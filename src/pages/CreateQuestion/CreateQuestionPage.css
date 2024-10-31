@@ -1,0 +1,8 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    row-gap: 4px;
+    margin-bottom: 8px;
+    text-align: left;
+    font-weight: bold;
+}

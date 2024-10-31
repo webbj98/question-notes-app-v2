@@ -1,0 +1,12 @@
+.alert {
+    padding: 8px;
+    margin: 8px;
+}
+
+.error {
+    background-color: lightcoral;
+}
+
+.success {
+    background-color: lightgreen;
+}

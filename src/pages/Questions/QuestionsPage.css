@@ -1,0 +1,9 @@
+table, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.table-row {
+    column-gap: 4px;
+}
+

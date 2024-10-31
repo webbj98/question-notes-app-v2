@@ -1,0 +1,6 @@
+.details {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    row-gap: 8px;
+}
