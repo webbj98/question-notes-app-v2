@@ -11,7 +11,7 @@ const QuestionsPage: React.FC = () => {
         async function getQuestions() {
             try {
                 //TODO: make a home screen and put question here
-                const response = await fetch('http://localhost:3000/', {
+                const response = await fetch('http://localhost:3000/questions', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

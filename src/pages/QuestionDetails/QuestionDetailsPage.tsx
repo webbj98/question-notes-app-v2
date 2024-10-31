@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom';
-import {Question, Attempt} from '../../../typings/model';
+import {Question, Attempt} from '../../../shared/typings/model';
 import './QuestionDetailsPage.css'
 import CreateAttempt from './CreateAttempt';
 import AttemptDisplay from './AttemptsDisplay';

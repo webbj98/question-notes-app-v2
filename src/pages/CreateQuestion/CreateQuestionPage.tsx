@@ -2,8 +2,8 @@ import { FormEvent, useState } from "react";
 import './CreateQuestionPage.css';
 import ErrorBox from "../../components/Alert";
 import Alert from "../../components/Alert";
-import { Importance } from "../../../typings/model";
-import { getImportanceMapEntries } from '../../../typings/mappings'
+import { Importance } from "../../../shared/typings/model";
+import { getImportanceMapEntries } from '../../../shared/typings/mappings'
 import CreateAttempt from "../QuestionDetails/CreateAttempt";
 
 const CreateQuestionPage: React.FC = () => {

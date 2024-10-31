@@ -1,4 +1,4 @@
-import { Attempt } from '../../../typings/model';
+import { Attempt } from '../../../shared/typings/model';
 import './QuestionDetailsPage.css';
 
 const AttemptCard: React.FC<{attempt: Attempt}> = ({attempt}) => {

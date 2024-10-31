@@ -2,7 +2,7 @@ import { FormEvent, useState, useEffect} from 'react';
 
 import './QuestionDetailsPage.css';
 import Alert from '../../components/Alert';
-import { getDsaPerfomanceMapLabelEntries } from '../../../typings/mappings';
+import { getDsaPerfomanceMapLabelEntries } from '../../../shared/typings/mappings';
 
 const CreateAttempt: React.FC<{questionId: number}> = ({questionId}) => {
     const [date, setDate] = useState('');

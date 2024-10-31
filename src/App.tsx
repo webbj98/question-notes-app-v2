@@ -9,6 +9,7 @@ import './App.css'
 import QuestionsPage from './pages/Questions/QuestionsPage'
 import CreateQuestionPage from './pages/CreateQuestion/CreateQuestionPage';
 import QuestionDetailsPage from './pages/QuestionDetails/QuestionDetailsPage';
+import EditQuestionPage from './pages/EditQuestion/EditQuestionPage';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,6 +27,10 @@ function App() {
   {
     path: 'questions/:id',
     element: <QuestionDetailsPage />,
+  },
+  {
+    path: 'questions/:id/edit',
+    element: <EditQuestionPage />
   }
 
   ])
