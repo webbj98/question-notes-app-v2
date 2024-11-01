@@ -11,7 +11,7 @@ export interface Question {
 export interface Attempt {
     id: number;
     // TODO: change to date
-    date: string;
+    date: Date;
     timeTaken: number;
     performance: string;
     questionId: number;
@@ -26,3 +26,4 @@ export type DsaPerformance = 'noIdea' | 'nonOptTrivial' | 'partialOpt' | 'nonOpt
 // Will be a combination of all perforamnce types
 export type Performance = DsaPerformance;
 
+export type QuestionType = 'dsa' |  'front-end';

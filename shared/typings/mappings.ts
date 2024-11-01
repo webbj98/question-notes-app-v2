@@ -55,3 +55,16 @@ export function getDsaPerformanceLabel(value: DsaPerformance) {
 export function getDsaPerfomanceMapLabelEntries() {
     return dsaPerformanceMapLabels.entries();
 }
+
+const questionTypeLabelMap = new Map<QuestionType, string>([
+    ['dsa', 'DSA'],
+    ['front-end', 'Front-End']
+])
+
+export function getQuestionTypeLabel(value: QuestionType) {
+    return questionTypeLabelMap.get(value);
+}
+
+export function getQuestionTypeLabelEntries() {
+    return questionTypeLabelMap.entries();
+}

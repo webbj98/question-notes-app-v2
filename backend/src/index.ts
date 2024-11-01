@@ -22,7 +22,8 @@ app.use(express.json())
 
 
 //TODO: should I make separte filel for queries
-app.get('/', async (req, res) => {
+app.get('/questions', async (req, res) => {
+    console.log('in questions')
     const data = await db.query('SELECT * FROM questions');
     console.log('getting the main page')
     res.status(200).json({
@@ -34,6 +35,7 @@ app.post('/questions', async (req, res) => {
     console.log('req: ', req.body)
 
     const {title, time, type, importance, url} = req.body
+    console.log('question type: ', type)
     const queryResult = 
         await db.query('INSERT INTO questions (title, time, type, importance, url) VALUES($1, $2, $3, $4, $5)', 
             [title, time, type, importance, toNullableString(url)])
@@ -43,23 +45,129 @@ app.post('/questions', async (req, res) => {
     res.status(200).json({message: 'Created question successfully'})
 });
 
+// IF BUG HAPPENS CHANGING route won't don anything unless restart server
+// questions/with-last-attempt
+// has something to do with code getting confused on which route is which 
+app.get('/questions/with-last-attempt', async (req, res) => {
+    console.log('got it: ')
+    try {
+
+        const data = await db.query(`
+            SELECT q.*, ranked_attempts.id as attempt_id, ranked_attempts.date, ranked_attempts.time_taken, ranked_attempts.performance, ranked_attempts.suggested_wait_duration
+            FROM questions q 
+            LEFT JOIN (
+                SELECT *,
+                    ROW_NUMBER() OVER(PARTITION BY question_id ORDER BY date DESC) AS attempt_rank
+                FROM attempts
+
+            ) AS ranked_attempts ON q.id = ranked_attempts.question_id
+            WHERE ranked_attempts.attempt_rank = 1 OR ranked_attempts.attempt_rank IS NULL;
+        `)
+
+
+
+        // const questionAttemptsWithDate = data.rows.map((questionAttempt) => {
+        //     const dateObj = new Date(questionAttempt.date)
+        //     console.log('date obj: ', dateObj.toLocaleDateString())
+        //     return {
+        //         ...questionAttempt,
+        //         date: dateObj,
+        //     }
+        // })
+        // console.log('data: ', data.rows)
+
+
+    /// get all questions attached with attempts
+        
+        const questionsAttemptData = data.rows.map((dataRow) => {
+
+            return {
+                id: dataRow.id,
+                title: dataRow.title,
+                time: dataRow.time,
+                type: dataRow.type,
+                importance: dataRow.importance,
+                url: dataRow.url,
+                notes: dataRow.notes,
+                attemptId: dataRow.attempt_id,
+                date: dataRow.date,
+                timeTaken: dataRow.time_taken, 
+                performance: dataRow.performance,
+                suggestedWaitDuration: dataRow.suggested_wait_duration,
+
+            }
+        })
+            
+        // const questionData = {
+        //     id: dataRow.id,
+        //     title: dataRow.title,
+        //     time: dataRow.time,
+        //     type: dataRow.type,
+        //     importance: dataRow.importance,
+        //     url: dataRow.url,
+        //     notes: dataRow.notes
+        // }
+
+        // const attemptData = {
+        //     id: dataRow.attempt_id,
+        //     date: dataRow.date,
+        //     timeTaken: dataRow.time_taken, 
+        //     performance: dataRow.performance,
+        //     suggestedWaitDuration: dataRow.suggested_wait_duration,
+        // }
+        
+
+        res.status(200).json({
+            questionsLastAttempt: questionsAttemptData,
+        })
+
+
+    } catch (error) {
+        console.log('got the error')
+        throw new Error('Error from server: ' +  error)
+    }
+
+    // res.status(200).json({message: 'mm'})
+})
+
+
 app.get('/questions/:id', async (req, res) => {
     const id = req.params.id;
+    const data = await db.query("SELECT * from questions q WHERE q.id = $1", [id]);
+    res.status(200).json({
+        data: data
+    })
+})
+
+
+
+
+
+app.get('/questions/:id/with-attempts', async (req, res) => {
+    const id = req.params.id;
     // const data = await db.query('SELECT * FROM questions q INNER JOIN attempts ON q.id = attempts.question_id WHERE q.id = $1;', [id]);
-    const data = await db.query("SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration FROM questions q INNER JOIN attempts as a ON q.id = a.question_id WHERE q.id = $1", [id]);
+    const data = await db.query(`
+        SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration
+        FROM questions q 
+        INNER JOIN attempts as a ON q.id = a.question_id 
+        WHERE q.id = $1`, [id]
+    );
     // const data = await db.query('SELECT * FROM questions WHERE id = $1', [id]);
     // console.log('data get: ', data)
+    // console.log('data: ', data)
     const dataRows = data.rows;
-    const dataRowsFirstElem = data.rows[0];
+    console.log('dataRows: ', dataRows)
+    const dataRowsFirstElem = dataRows[0];
+    console.log('dataRowsFirstElem: ', dataRowsFirstElem)
 
     const questionData = {
-        id: dataRowsFirstElem.id,
-        title: dataRowsFirstElem.title,
-        time: dataRowsFirstElem.time,
-        type: dataRowsFirstElem.type,
-        importance: dataRowsFirstElem.importance,
-        url: dataRowsFirstElem.url,
-        notes: dataRowsFirstElem.notes
+        id: dataRowsFirstElem?.id,
+        title: dataRowsFirstElem?.title,
+        time: dataRowsFirstElem?.time,
+        type: dataRowsFirstElem?.type,
+        importance: dataRowsFirstElem?.importance,
+        url: dataRowsFirstElem?.url,
+        notes: dataRowsFirstElem?.notes
     }
 
     const attemptsData = new Array<any>();
@@ -82,17 +190,124 @@ app.get('/questions/:id', async (req, res) => {
 })
 
 
+
+
+app.get('/questions/:id/with-last-attempt', async (req, res) => {
+    console.log('in here')
+    const id  = req.params.id;
+
+    try {
+        const data = await db.query(`
+            SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration
+            FROM questions q 
+            INNER JOIN attempts as a ON q.id = a.question_id 
+            WHERE q.id = $1
+            ORDER BY a.date DESC LIMIT 1`
+            , [id]
+        );
+
+        const dataRow = data.rows[0];
+
+
+        const questionData = {
+            id: dataRow.id,
+            title: dataRow.title,
+            time: dataRow.time,
+            type: dataRow.type,
+            importance: dataRow.importance,
+            url: dataRow.url,
+            notes: dataRow.notes
+        }
+
+        const attemptData = {
+            id: dataRow.attempt_id,
+            date: dataRow.date,
+            timeTaken: dataRow.time_taken, 
+            performance: dataRow.performance,
+            suggestedWaitDuration: dataRow.suggested_wait_duration,
+        }
+        res.status(200).json({
+            questionData: questionData,
+            attemptData: attemptData,
+        })
+
+
+    } catch (error) {
+        throw new Error('Error from server: ' +  error)
+    }
+})
+
+
+
+app.patch('/questions/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    const args = req.body;
+    let argNum = 1;
+    const buildQuery = ['UPDATE questions SET'];
+    const updateSegments: string[] = [];
+    const arguements: (string | number)[] = [];
+    console.log('args: ', args)
+    try {
+        const titleSegment = `title = $${argNum}`;
+        if (args.title) {
+            arguements.push(args.title);
+            updateSegments.push(titleSegment);
+            argNum++;
+        }
+
+        const timeSegment = `time = $${argNum}`;
+        if (args.time) {
+            arguements.push(args.time);
+            updateSegments.push(timeSegment);
+            argNum++;
+        }
+
+        const typeSegment = `type = $${argNum}`;
+        if (args.type) {
+            arguements.push(args.type);
+            updateSegments.push(typeSegment);
+            argNum++;
+        }
+
+        const updateSec = updateSegments.join(', ');
+        buildQuery.push(updateSec);
+        buildQuery.push(`WHERE id=$${argNum}`);
+        const fullQuery = buildQuery.join(' ');
+        arguements.push(id);
+        console.log('full query: ', fullQuery);
+        console.log('arguements: ', arguements)
+
+        const result = db.query(fullQuery, arguements);
+        
+
+        // console.log('attemptInfo: ', attemptInfo);
+        res.status(200).json({data: result})
+    } catch (error) {
+        console.log('update type error: ', error);
+        throw error;
+    }
+
+
+})
+
 app.post('/attempts', async (req, res) => {
     const {date, timeTaken, performance, questionId, suggestedWaitDuration} = req.body
+    console.log('suggestedWaitDuration: ', suggestedWaitDuration)
     console.log('performance: ', performance)
     const queryResult = 
-        await db.query('INSERT INTO attempts (date, time_taken, performance, question_id, suggested_wait_duration) VALUES($1, $2, $3, $4, $5)',
+        await db.query('INSERT INTO attempts (date, time_taken, performance, question_id, suggested_wait_duration) VALUES($1, $2, $3, $4, $5) RETURNING *',
             [date, timeTaken, performance, questionId, suggestedWaitDuration]
         );
     
     console.log('queryResult: ', queryResult);
-    res.status(200).json({message: 'Created attempts successfully'})  
+    console.log('queryResult row count: ', queryResult.rows)
+    res.status(200).json({data: queryResult.rows[0]})  
 })
+
+app.use((req, res, next) => {
+    console.log(`${req.method} request to ${req.url}`);
+    next();
+  });
 
 
 app.listen(port, () => {

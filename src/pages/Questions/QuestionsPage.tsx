@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './QuestionsPage.css';
+import { getQuestionTypeLabel } from "../../../shared/typings/mappings";
 
 const QuestionsPage: React.FC = () => {
 
@@ -11,7 +12,7 @@ const QuestionsPage: React.FC = () => {
         async function getQuestions() {
             try {
                 //TODO: make a home screen and put question here
-                const response = await fetch('http://localhost:3000/questions', {
+                const response = await fetch('http://localhost:3000/questions/with-last-attempt', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -21,12 +22,19 @@ const QuestionsPage: React.FC = () => {
                 if (response.ok) {
                     const result = await response.json();
                     console.log('result: ', result)
-                    setQuestions(result.data);
+                    const questionsLastAttemptWithDate = result.questionsLastAttempt.map((questionLastAttempt) => {
+                        const dateObj = new Date(questionLastAttempt.date);
+                        return {
+                            ...questionLastAttempt,
+                            date: dateObj
+                        }
+                    })
+                    setQuestions(questionsLastAttemptWithDate);
                 } else {
                     console.log('response not ok: ', response)
                 }
             } catch (error) {
-                console.log('error: ', error)
+                console.log('error at some point: ', error)
                 // setErrorMsg()
             }
         }
@@ -35,15 +43,24 @@ const QuestionsPage: React.FC = () => {
 
     }, [])
 
-    console.log('questinos: ', questions)
+    // console.log('questinos: ', questions)
     const questionRowDisplay = questions?.map((question) => {
+        const copyDate = new Date(question.date)
+        copyDate.setDate(question.date.getDate() + question?.suggestedWaitDuration)
+        // retakeDate?.setDate(retakeDate.getDate() + question?.suggestedWaitDuration)
+
+        // console.log('question wait time: ', question.suggestedWaitDuration)
         return (
             <tr>
                 <td><Link to={`questions/${question.id}`}>{question.title}</Link></td>
-                <td>{question.time}</td>
-                <td>{question.type}</td>
+                <td>{question.date.toLocaleDateString()}</td>
+                <td>{question.timeTaken} / {question.time}</td>
+                <td>{getQuestionTypeLabel(question.type)}</td>
                 <td>{question.importance}</td>
                 <td>{question.url}</td>
+                <td>{question.suggestedWaitDuration}</td>
+                <td>{copyDate.toLocaleDateString()}</td>
+                
             </tr>
         )
     })
@@ -56,10 +73,14 @@ const QuestionsPage: React.FC = () => {
                 <thead>
                     <tr className="table-row">
                         <th>Title</th>
-                        <th>Time</th>
+                        <th>Date</th>
+                        <th>Time Taken / Total TIme</th>
                         <th>Type</th>
                         <th>Importance</th>
                         <th>Url</th>
+                        <th>Wait Time (days)</th>
+                        <th>Retake Date</th>
+                        
                     </tr>
 
                 </thead>

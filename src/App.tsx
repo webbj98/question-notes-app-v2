@@ -10,14 +10,17 @@ import QuestionsPage from './pages/Questions/QuestionsPage'
 import CreateQuestionPage from './pages/CreateQuestion/CreateQuestionPage';
 import QuestionDetailsPage from './pages/QuestionDetails/QuestionDetailsPage';
 import EditQuestionPage from './pages/EditQuestion/EditQuestionPage';
+import HomePage from './pages/Home/HomePage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   const router = createBrowserRouter([
     
     {
       path: '/',
+      element: <HomePage />
+    },
+    {
+      path: '/questions',
       element: <QuestionsPage />
     },
     {
@@ -34,30 +37,6 @@ function App() {
   }
 
   ])
-
-  const testSend = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/', {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
-      })
-      if (response.ok) {
-        const res = await response.json();
-
-        console.log('res: ', res.message);
-      } else {
-        const blah = await response.json();
-        console.log('blah: ', blah)
-
-      }
-      
-    } catch (error) {
-      console.log('error: ', error)
-    }
-    
-
-
-  }
 
   return (
     <RouterProvider router={router} />

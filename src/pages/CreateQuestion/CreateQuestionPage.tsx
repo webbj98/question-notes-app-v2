@@ -3,7 +3,7 @@ import './CreateQuestionPage.css';
 import ErrorBox from "../../components/Alert";
 import Alert from "../../components/Alert";
 import { Importance } from "../../../shared/typings/model";
-import { getImportanceMapEntries } from '../../../shared/typings/mappings'
+import { getImportanceMapEntries, getQuestion, getQuestionTypeLabelEntries } from '../../../shared/typings/mappings'
 import CreateAttempt from "../QuestionDetails/CreateAttempt";
 
 const CreateQuestionPage: React.FC = () => {
@@ -33,6 +33,7 @@ const CreateQuestionPage: React.FC = () => {
         event.preventDefault();
 
         async function createQuestion() {
+            console.log('type before send: ', type)
             try {
                 const response = await fetch('http://localhost:3000/questions' , {
                     method: 'POST',
@@ -79,7 +80,7 @@ const CreateQuestionPage: React.FC = () => {
     }
 
     const importanceOptions = [...getImportanceMapEntries()].map(([importanceKey, label]) => <option key={importanceKey} value={importanceKey}>{importanceKey} - {label}</option> )
-    
+    const questionTypeOptions = [...getQuestionTypeLabelEntries()].map(([typeKey, label]) => <option key={typeKey} value={typeKey}>{label}</option>)
     return (
         <div>
             <h1>Create Question</h1>
@@ -101,8 +102,8 @@ const CreateQuestionPage: React.FC = () => {
                 <div className="section">
                     <label htmlFor="type">Type</label>
                     <select required onChange={(event) => handleChangeType(event.target.value)}>
-                        <option value="1">Test type 1</option>
-                        <option value="2">Test type 2</option>
+                        <option selected disabled hidden defaultChecked ></option>
+                        {questionTypeOptions}
                     </select>
                     {/* <input id="type" type="number" min={0}></input> */}
                 </div>

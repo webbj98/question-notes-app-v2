@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {Question, Attempt} from '../../../shared/typings/model';
 import './QuestionDetailsPage.css'
 import CreateAttempt from './CreateAttempt';
@@ -9,10 +9,16 @@ const QuestionDetailsPage: React.FC = () => {
     const [attempts, setAttempts] = useState<Attempt[]>([]);
     const {id} = useParams();
 
+    const handleCreateAttempt = (attempt: Attempt) => {
+        setAttempts((prevAttempts) => {
+            return [...prevAttempts, attempt]
+        })
+    }
+
     useEffect(() => {
         async function getQuestionAndAttempts() {
             
-            const response = await fetch(`http://localhost:3000/questions/${id}`, {
+            const response = await fetch(`http://localhost:3000/questions/${id}/with-attempts`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -24,15 +30,16 @@ const QuestionDetailsPage: React.FC = () => {
 
             } else {
                 const result = await response.json();
-                console.log('result: ', result)
+                console.log('result: ', result.attemptsData)
                 setQuestion(result.questionData)
+                
                 setAttempts(result.attemptsData)
+                console.log('set attempts: ')
             }
         }
 
         getQuestionAndAttempts();
-
-    }, [])
+    }, [id])
 
     
 
@@ -42,6 +49,8 @@ const QuestionDetailsPage: React.FC = () => {
 
             <h2>Title: {question?.title} </h2>
 
+            <button> <Link to='edit'>Edit Button</Link></button>
+
             <div className='details'>
                 <label>Time: {question?.time} minutes</label>
                 <label>Type: {question?.type}</label>
@@ -50,7 +59,7 @@ const QuestionDetailsPage: React.FC = () => {
 
             <AttemptDisplay attempts={attempts} />
             
-            {question?.id && <CreateAttempt questionId={question?.id} />}
+            {id && <CreateAttempt questionId={Number(id)} onCreateAttempt={handleCreateAttempt} />}
 
             
 

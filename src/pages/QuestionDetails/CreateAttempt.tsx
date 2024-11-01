@@ -3,8 +3,9 @@ import { FormEvent, useState, useEffect} from 'react';
 import './QuestionDetailsPage.css';
 import Alert from '../../components/Alert';
 import { getDsaPerfomanceMapLabelEntries } from '../../../shared/typings/mappings';
+import { Attempt } from '../../../shared/typings/model';
 
-const CreateAttempt: React.FC<{questionId: number}> = ({questionId}) => {
+const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: Attempt) => void}> = ({questionId, onCreateAttempt}) => {
     const [date, setDate] = useState('');
     const [timeTaken, setTimeTaken] = useState<number>();
     // performance
@@ -35,6 +36,7 @@ const CreateAttempt: React.FC<{questionId: number}> = ({questionId}) => {
                 const res = await response.json();
                 console.log('res: ', res);
                 setSubmitSucess(true);
+                onCreateAttempt(res.data as Attempt)
             } else {
                 console.log('error from response: ', response);
             }
