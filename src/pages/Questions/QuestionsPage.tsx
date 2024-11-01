@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './QuestionsPage.css';
 import { getQuestionTypeLabel } from "../../../shared/typings/mappings";
+import Alert from "../../components/Alert";
 
 const QuestionsPage: React.FC = () => {
 
@@ -31,7 +32,9 @@ const QuestionsPage: React.FC = () => {
                     })
                     setQuestions(questionsLastAttemptWithDate);
                 } else {
-                    console.log('response not ok: ', response)
+                    const errRes = await response.json()
+                    setErrorMsg(errRes.message)
+                    console.log('response not ok: ', errRes)
                 }
             } catch (error) {
                 console.log('error at some point: ', error)
@@ -68,6 +71,8 @@ const QuestionsPage: React.FC = () => {
     return (
         <div>
             <h1>Questions</h1>
+
+            {errorMsg && <Alert message={errorMsg} type='error' />}
 
             <table>
                 <thead>

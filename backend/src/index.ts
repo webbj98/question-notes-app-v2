@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {ErrorRequestHandler} from 'express';
 import cors from 'cors';
 import {Client} from 'pg';
 import { toNullableString } from './utils';
@@ -20,36 +20,55 @@ app.use(cors())
 // middleware that parses json for us
 app.use(express.json())
 
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+
+    console.log('err: ', err)
+    // console.log('errdsf: ', err/4)
+    res.status(err.status || 500).json({
+        message: err.message || 'Internal Server Error',
+        error: process.env.NODE_ENV === 'production' ? {} : err.stack, // Hide error details in production
+    })
+
+    // message: err.message || 'Internal Server Error',
+}
+
+
+
 
 //TODO: should I make separte filel for queries
 app.get('/questions', async (req, res) => {
     console.log('in questions')
     const data = await db.query('SELECT * FROM questions');
     console.log('getting the main page')
+    
     res.status(200).json({
         data: data.rows
     })
 });
 
-app.post('/questions', async (req, res) => {
-    console.log('req: ', req.body)
+app.post('/questions', async (req, res, next) => {
+    try {
+        console.log('req: ', req.body)
 
-    const {title, time, type, importance, url} = req.body
-    console.log('question type: ', type)
-    const queryResult = 
-        await db.query('INSERT INTO questions (title, time, type, importance, url) VALUES($1, $2, $3, $4, $5)', 
-            [title, time, type, importance, toNullableString(url)])
-    // const data = await db.query('SELECT ')
-    console.log('queryResult: ', queryResult)
+        const {title, time, type, importance, url} = req.body
+        console.log('question type: ', type)
+        const queryResult = 
+            await db.query('INSERT INTO questions (title, time, type, importance, url) VALUES($1, $2, $3, $4, $5)', 
+                [title, time, type, importance, toNullableString(url)])
+        // const data = await db.query('SELECT ')
+        console.log('queryResult: ', queryResult)
+        
+            
+    } catch (error) {
+        next(error)
+    }
     
-    res.status(200).json({message: 'Created question successfully'})
 });
 
 // IF BUG HAPPENS CHANGING route won't don anything unless restart server
 // questions/with-last-attempt
 // has something to do with code getting confused on which route is which 
-app.get('/questions/with-last-attempt', async (req, res) => {
-    console.log('got it: ')
+app.get('/questions/with-last-attempt', async (req, res, next) => {
     try {
 
         const data = await db.query(`
@@ -97,25 +116,8 @@ app.get('/questions/with-last-attempt', async (req, res) => {
 
             }
         })
-            
-        // const questionData = {
-        //     id: dataRow.id,
-        //     title: dataRow.title,
-        //     time: dataRow.time,
-        //     type: dataRow.type,
-        //     importance: dataRow.importance,
-        //     url: dataRow.url,
-        //     notes: dataRow.notes
-        // }
 
-        // const attemptData = {
-        //     id: dataRow.attempt_id,
-        //     date: dataRow.date,
-        //     timeTaken: dataRow.time_taken, 
-        //     performance: dataRow.performance,
-        //     suggestedWaitDuration: dataRow.suggested_wait_duration,
-        // }
-        
+        throw new Error('test error throw')
 
         res.status(200).json({
             questionsLastAttempt: questionsAttemptData,
@@ -124,7 +126,8 @@ app.get('/questions/with-last-attempt', async (req, res) => {
 
     } catch (error) {
         console.log('got the error')
-        throw new Error('Error from server: ' +  error)
+        next(error)
+        // throw new Error('Error from server: ' +  error)
     }
 
     // res.status(200).json({message: 'mm'})
@@ -138,10 +141,6 @@ app.get('/questions/:id', async (req, res) => {
         data: data
     })
 })
-
-
-
-
 
 app.get('/questions/:id/with-attempts', async (req, res) => {
     const id = req.params.id;
@@ -188,9 +187,6 @@ app.get('/questions/:id/with-attempts', async (req, res) => {
         
     })
 })
-
-
-
 
 app.get('/questions/:id/with-last-attempt', async (req, res) => {
     console.log('in here')
@@ -301,6 +297,7 @@ app.post('/attempts', async (req, res) => {
     
     console.log('queryResult: ', queryResult);
     console.log('queryResult row count: ', queryResult.rows)
+    
     res.status(200).json({data: queryResult.rows[0]})  
 })
 
@@ -309,7 +306,7 @@ app.use((req, res, next) => {
     next();
   });
 
-
+app.use(errorHandler);
 app.listen(port, () => {
     console.log('Listing on port 3000323')
 })
