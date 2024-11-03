@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import './QuestionsPage.css';
 import { getQuestionTypeLabel } from "../../../shared/typings/mappings";
 import Alert from "../../components/Alert";
+import { AlertTypes } from "../../../shared/typings/model";
 
 const QuestionsPage: React.FC = () => {
 
@@ -55,7 +56,7 @@ const QuestionsPage: React.FC = () => {
         // console.log('question wait time: ', question.suggestedWaitDuration)
         return (
             <tr>
-                <td><Link to={`questions/${question.id}`}>{question.title}</Link></td>
+                <td><Link to={`${question.id}`}>{question.title}</Link></td>
                 <td>{question.date.toLocaleDateString()}</td>
                 <td>{question.timeTaken} / {question.time}</td>
                 <td>{getQuestionTypeLabel(question.type)}</td>
@@ -72,14 +73,14 @@ const QuestionsPage: React.FC = () => {
         <div>
             <h1>Questions</h1>
 
-            {errorMsg && <Alert message={errorMsg} type='error' />}
+            {errorMsg && <Alert message={errorMsg} type={AlertTypes.Error} />}
 
             <table>
                 <thead>
                     <tr className="table-row">
                         <th>Title</th>
                         <th>Date</th>
-                        <th>Time Taken / Total TIme</th>
+                        <th>Time Taken / Total Time (minutes)</th>
                         <th>Type</th>
                         <th>Importance</th>
                         <th>Url</th>
@@ -94,7 +95,7 @@ const QuestionsPage: React.FC = () => {
 
                 </tbody>
             </table>
-            <Link to={'questions/new'}>
+            <Link to={'new'}>
                 <button>Create Question</button>
             </Link>
             

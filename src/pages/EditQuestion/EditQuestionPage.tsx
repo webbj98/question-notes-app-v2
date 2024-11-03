@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
-import { DsaPerformance, Question, QuestionType } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance, Question, QuestionType } from "../../../shared/typings/model";
 import Alert from "../../components/Alert";
 import { getImportanceMapEntries, getQuestionTypeLabelEntries } from "../../../shared/typings/mappings";
 import {API_ROUTES} from '../../../shared/routes';
@@ -102,8 +102,8 @@ const EditQuestionPage: React.FC = () => {
         <div>
             <h1>Edit Question</h1>
 
-            {errorMsg && <Alert message={errorMsg} type="error"/>}
-            {submitSuccess && <Alert message="Successfully edited question" type="success"/>}
+            {errorMsg && <Alert message={errorMsg} type={AlertTypes.Error}/>}
+            {submitSuccess && <Alert message="Successfully edited question" type={AlertTypes.Success}/>}
 
             <form onSubmit={handleSubmit}>
                 <div className="section">

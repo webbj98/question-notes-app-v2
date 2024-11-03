@@ -27,3 +27,8 @@ export type DsaPerformance = 'noIdea' | 'nonOptTrivial' | 'partialOpt' | 'nonOpt
 export type Performance = DsaPerformance;
 
 export type QuestionType = 'dsa' |  'front-end';
+
+export enum AlertTypes {
+    Success = 'success',
+    Error = 'error',
+}

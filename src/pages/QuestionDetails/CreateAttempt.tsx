@@ -3,7 +3,7 @@ import { FormEvent, useState, useEffect} from 'react';
 import './QuestionDetailsPage.css';
 import Alert from '../../components/Alert';
 import { getDsaPerfomanceMapLabelEntries } from '../../../shared/typings/mappings';
-import { Attempt } from '../../../shared/typings/model';
+import { AlertTypes, Attempt } from '../../../shared/typings/model';
 
 const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: Attempt) => void}> = ({questionId, onCreateAttempt}) => {
     const [date, setDate] = useState('');
@@ -52,7 +52,7 @@ const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: At
     return (
         <div>
             <h2>Create Attempt</h2>
-            {submitSuccess && <Alert message='Attempt creation successful' type='success'/>}
+            {submitSuccess && <Alert message='Attempt creation successful' type={AlertTypes.Success}/>}
             <form onSubmit={handleSubmit}>
                 <div className="section">
                     <label htmlFor="date">Date</label>

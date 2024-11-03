@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import './CreateQuestionPage.css';
 import ErrorBox from "../../components/Alert";
 import Alert from "../../components/Alert";
-import { Importance } from "../../../shared/typings/model";
+import { AlertTypes, Importance } from "../../../shared/typings/model";
 import { getImportanceMapEntries, getQuestion, getQuestionTypeLabelEntries } from '../../../shared/typings/mappings'
 import CreateAttempt from "../QuestionDetails/CreateAttempt";
 
@@ -85,8 +85,8 @@ const CreateQuestionPage: React.FC = () => {
         <div>
             <h1>Create Question</h1>
 
-            {errorMsg && <Alert message={errorMsg} type="error"/>}
-            {submitSuccess && <Alert message="Successfully created question" type="success"/>}
+            {errorMsg && <Alert message={errorMsg} type={AlertTypes.Error}/>}
+            {submitSuccess && <Alert message="Successfully created question" type={AlertTypes.Success}/>}
 
             <form onSubmit={handleSubmit}>
                 <div className="section">
