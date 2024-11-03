@@ -1,9 +1,11 @@
 import express, {ErrorRequestHandler} from 'express';
 import cors from 'cors';
 // import {Client} from 'pg';
-import { toNullableString } from './utils';
+import { toNullableString } from './utils.js';
 import { connectToDb, getQuestionsWithLastAttempt } from './dbManager';
-
+import {API_ROUTES} from '../../shared/routes.js'
+import { CreateQuestionInput } from '../../shared/typings/queryInputs.ts';
+import { createQuestion } from './dbManager.ts';
 const app = express();
 const port = 3000;
 
@@ -48,28 +50,29 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 //     })
 // });
 
-// app.post('/questions', async (req, res, next) => {
-//     try {
-//         console.log('req: ', req.body)
+app.post('/questions', async (req, res, next) => {
+    try {
+        console.log('req: ', req.body)
 
-//         const {title, time, type, importance, url} = req.body
-//         console.log('question type: ', type)
-//         const queryResult = 
-//             await db.query('INSERT INTO questions (title, time, type, importance, url) VALUES($1, $2, $3, $4, $5)', 
-//                 [title, time, type, importance, toNullableString(url)])
-//         // const data = await db.query('SELECT ')
-//         console.log('queryResult: ', queryResult)
-//     } catch (error) {
-//         next(error)
-//     }
+        const createQuestionInput: CreateQuestionInput = req.body;
+        const question = createQuestion(createQuestionInput);
+        // const data = await db.query('SELECT ')
+        // console.log('queryResult: ', queryResult)
+        res.status(200).json({
+            question
+        })
+    } catch (error) {
+        next(error)
+    }
     
-// });
+});
 
 // IF BUG HAPPENS CHANGING route won't don anything unless restart server
 // questions/with-last-attempt
 // has something to do with code getting confused on which route is which 
-app.get('/questions/with-last-attempt', async (req, res, next) => {
+app.get(`${API_ROUTES.questions}/with-last-attempt`, async (req, res, next) => {
     try {
+        // API_ROUTES.questions
         const questionsAttemptData = await getQuestionsWithLastAttempt()
         console.log('db query done')
         // throw new Error('test error throw')
@@ -97,51 +100,51 @@ app.get('/questions/with-last-attempt', async (req, res, next) => {
 //     })
 // })
 
-// app.get('/questions/:id/with-attempts', async (req, res) => {
-//     const id = req.params.id;
-//     // const data = await db.query('SELECT * FROM questions q INNER JOIN attempts ON q.id = attempts.question_id WHERE q.id = $1;', [id]);
-//     const data = await db.query(`
-//         SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration
-//         FROM questions q 
-//         INNER JOIN attempts as a ON q.id = a.question_id 
-//         WHERE q.id = $1`, [id]
-//     );
-//     // const data = await db.query('SELECT * FROM questions WHERE id = $1', [id]);
-//     // console.log('data get: ', data)
-//     // console.log('data: ', data)
-//     const dataRows = data.rows;
-//     console.log('dataRows: ', dataRows)
-//     const dataRowsFirstElem = dataRows[0];
-//     console.log('dataRowsFirstElem: ', dataRowsFirstElem)
+app.get('/questions/:id/with-attempts', async (req, res) => {
+    const id = req.params.id;
+    // const data = await db.query('SELECT * FROM questions q INNER JOIN attempts ON q.id = attempts.question_id WHERE q.id = $1;', [id]);
+    const data = await db.query(`
+        SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration
+        FROM questions q 
+        INNER JOIN attempts as a ON q.id = a.question_id 
+        WHERE q.id = $1`, [id]
+    );
+    // const data = await db.query('SELECT * FROM questions WHERE id = $1', [id]);
+    // console.log('data get: ', data)
+    // console.log('data: ', data)
+    const dataRows = data.rows;
+    console.log('dataRows: ', dataRows)
+    const dataRowsFirstElem = dataRows[0];
+    console.log('dataRowsFirstElem: ', dataRowsFirstElem)
 
-//     const questionData = {
-//         id: dataRowsFirstElem?.id,
-//         title: dataRowsFirstElem?.title,
-//         time: dataRowsFirstElem?.time,
-//         type: dataRowsFirstElem?.type,
-//         importance: dataRowsFirstElem?.importance,
-//         url: dataRowsFirstElem?.url,
-//         notes: dataRowsFirstElem?.notes
-//     }
+    const questionData = {
+        id: dataRowsFirstElem?.id,
+        title: dataRowsFirstElem?.title,
+        time: dataRowsFirstElem?.time,
+        type: dataRowsFirstElem?.type,
+        importance: dataRowsFirstElem?.importance,
+        url: dataRowsFirstElem?.url,
+        notes: dataRowsFirstElem?.notes
+    }
 
-//     const attemptsData = new Array<any>();
-//     dataRows.forEach(({attempt_id, date, time_taken, performance, suggested_wait_duration}) => {
-//         attemptsData.push({
-//             id: attempt_id,
-//             date: date,
-//             timeTaken: time_taken, 
-//             performance: performance,
-//             suggestedWaitDuration: suggested_wait_duration,
-//         })
+    const attemptsData = new Array<any>();
+    dataRows.forEach(({attempt_id, date, time_taken, performance, suggested_wait_duration}) => {
+        attemptsData.push({
+            id: attempt_id,
+            date: date,
+            timeTaken: time_taken, 
+            performance: performance,
+            suggestedWaitDuration: suggested_wait_duration,
+        })
 
-//     })
+    })
 
-//     res.status(200).json({
-//         questionData: questionData,
-//         attemptsData: attemptsData,
+    res.status(200).json({
+        questionData: questionData,
+        attemptsData: attemptsData,
         
-//     })
-// })
+    })
+})
 
 // app.get('/questions/:id/with-last-attempt', async (req, res) => {
 //     console.log('in here')

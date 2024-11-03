@@ -1,20 +1,17 @@
 
-import {Client} from 'pg';
+import pg from 'pg'
+import { CreateQuestionInput } from '../../shared/typings/queryInputs.ts';
+import { toNullableString } from './utils.ts';
+import { Question } from '../../shared/typings/model.ts';
+// import { Client } from "pg";
+const ClientObj = pg.Client;
 
-let db: Client;
-// const db = new Client({
-//     user: 'postgres',
-//     host: 'localhost',
-//     database: 'question_notes',
-//     password: '1234',
-//     port: 5432
-// });
+let db: pg.Client;
+// let db: Client;
 
-// db.connect();
- 
 export function connectToDb() {
     console.log('made db')
-    db = new Client({
+    db = new ClientObj({
         user: 'postgres',
         host: 'localhost',
         database: 'question_notes',
@@ -78,3 +75,9 @@ export async function getQuestionsWithLastAttempt() {
     return questionsAttemptData;
 }
 
+export async function createQuestion({title, time, type, importance, url} : CreateQuestionInput): Question {
+    const queryResult = await db.query<Question>('INSERT INTO questions (title, time, type, importance, url) VALUES($1, $2, $3, $4, $5) RETURNING *', 
+        [title, time, type, importance, url])
+
+    return queryResult.rows[0];
+}

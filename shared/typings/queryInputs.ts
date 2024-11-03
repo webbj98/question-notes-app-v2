@@ -1,8 +1,14 @@
+import { QuestionType } from "./model.ts";
+
 export interface CreateQuestionInput {
     title: string;
     time: number;
-    importance: number | string;
+    type: QuestionType;
+    importance: number | null;
     url: string | null;
-    notes: string | null;
 }
 
+// I made this general interface as I wanted to keep with theme of typing query inputs
+export interface GetByIdInput {
+    id: number;
+}

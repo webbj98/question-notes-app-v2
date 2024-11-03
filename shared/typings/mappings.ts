@@ -1,4 +1,4 @@
-import {DsaPerformance, Importance} from './model'
+import {DsaPerformance, Importance, QuestionType} from './model'
 
 // const importanceMap: Record<Importance, string> = {
 //     1: 'Top',
