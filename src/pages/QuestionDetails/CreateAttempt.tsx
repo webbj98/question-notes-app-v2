@@ -35,6 +35,8 @@ const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: At
             if (response.ok) {
                 const res = await response.json();
                 console.log('res: ', res);
+                const newAttempt = res.data as Attempt;
+                newAttempt.date = new Date(newAttempt.date)
                 setSubmitSucess(true);
                 onCreateAttempt(res.data as Attempt)
             } else {

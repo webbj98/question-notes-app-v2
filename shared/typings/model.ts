@@ -13,7 +13,7 @@ export interface Attempt {
     // TODO: change to date
     date: Date;
     timeTaken: number;
-    performance: string;
+    performance: Performance;
     questionId: number;
     suggestedWaitDuration: number;
 }

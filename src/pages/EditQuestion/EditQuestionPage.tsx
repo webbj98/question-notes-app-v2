@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
-import { AlertTypes, DsaPerformance, Question, QuestionType } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance, Importance, Question, QuestionType } from "../../../shared/typings/model";
 import Alert from "../../components/Alert";
 import { getImportanceMapEntries, getQuestionTypeLabelEntries } from "../../../shared/typings/mappings";
 import {API_ROUTES} from '../../../shared/routes';
@@ -118,7 +118,7 @@ const EditQuestionPage: React.FC = () => {
 
                 <div className="section">
                     <label htmlFor="type">Type</label>
-                    <select required onChange={(event) => handleChangeType(event.target.value)}>
+                    <select onChange={(event) => handleChangeType(event.target.value)}>
                     <option selected disabled hidden defaultChecked ></option>
                         {questionTypeOptions}
                     </select>
