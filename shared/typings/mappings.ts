@@ -1,4 +1,4 @@
-import {DsaPerformance, Importance, QuestionType} from './model'
+import {DsaPerformance, FrontEndPerformance, Importance, QuestionType} from './model'
 
 // const importanceMap: Record<Importance, string> = {
 //     1: 'Top',
@@ -55,6 +55,37 @@ export function getDsaPerformanceLabel(value: DsaPerformance) {
 export function getDsaPerfomanceMapLabelEntries() {
     return dsaPerformanceMapLabels.entries();
 }
+
+const frontEndPerformanceMapRatings = new Map<FrontEndPerformance, number>([
+    ['noIdea', 1],
+    ['someFeatures', 2],
+    ['coreFeatures', 3],
+    ['confidentCoreFeatures', 4],
+    ['polish', 5],
+    ['confidentPolish', 6],
+]);
+
+export function getFrontEndPerformance(value: FrontEndPerformance) {
+    return frontEndPerformanceMapRatings.get(value)
+}
+
+const frontEndPerformanceMapLabels = new Map<FrontEndPerformance, string>([
+    ['noIdea', 'No Idea'],
+    ['someFeatures', 'Some Features'],
+    ['coreFeatures', 'Core Features'],
+    ['confidentCoreFeatures', 'Confident Core Features'],
+    ['polish', 'Polish'],
+    ['confidentPolish', 'Confident Polish'],
+])
+
+export function getFrontEndPerformanceLabel(value: FrontEndPerformance) {
+    return frontEndPerformanceMapLabels.get(value);
+}
+
+export function getFrontEndPerfomanceMapLabelEntries() {
+    return frontEndPerformanceMapLabels.entries();
+}
+
 
 const questionTypeLabelMap = new Map<QuestionType, string>([
     ['dsa', 'DSA'],

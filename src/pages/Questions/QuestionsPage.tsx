@@ -1,61 +1,139 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './QuestionsPage.css';
-import { getDsaPerformanceLabel, getQuestionTypeLabel } from "../../../shared/typings/mappings";
+import { getDsaPerformanceLabel, getDsaPerformanceRating, getQuestionTypeLabel } from "../../../shared/typings/mappings";
 import Alert from "../../components/Alert";
-import { AlertTypes } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance } from "../../../shared/typings/model";
 import { useFetchQuestionsWithLastAttempt } from "../../http";
+import { computeRetakeDate } from "../../util";
+
+const sortColumns = new Map([
+    ['title', {label: 'Title', dataType: 'string'}],
+    ['date', {label: 'Date', dataType: 'Date'}],
+    ['retakeDate', {label: 'Retake Date', dataType: 'Date'}],
+    ['importance', {label: 'Importance', dataType: 'Importance'}],
+    ['performance', {label: 'Performance', dataType: 'Perfomance'}],
+])
+
+enum SORT_DIR {
+    ASC = 'asc',
+    DESC = 'desc'
+}
 
 const QuestionsPage: React.FC = () => {
 
     // const [questions, setQuestions] = useState([]);
     // const [errorMsg, setErrorMsg] = useState('');
     const {questionsWithLastAttempt, error, isLoading} = useFetchQuestionsWithLastAttempt()
-    // useEffect(() => {
-    //     async function getQuestions() {
-    //         try {
-    //             //TODO: make a home screen and put question here
-    //             const response = await fetch('http://localhost:3000/questions/with-last-attempt', {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                 }
-    //             });
+    const [sortColumn, setSortColumn] = useState('title')
+    const [sortDir, setSortDir] = useState(SORT_DIR.ASC)
 
-    //             if (response.ok) {
-    //                 const result = await response.json();
-    //                 console.log('result: ', result)
-    //                 const questionsLastAttemptWithDate = result.questionsLastAttempt.map((questionLastAttempt) => {
-    //                     const dateObj = new Date(questionLastAttempt.date);
-    //                     return {
-    //                         ...questionLastAttempt,
-    //                         date: dateObj
-    //                     }
-    //                 })
-    //                 setQuestions(questionsLastAttemptWithDate);
-    //             } else {
-    //                 const errRes = await response.json()
-    //                 setErrorMsg(errRes.message)
-    //                 console.log('response not ok: ', errRes)
-    //             }
-    //         } catch (error) {
-    //             console.log('error at some point: ', error)
-    //             // setErrorMsg()
-    //         }
-    //     }
+    const sortQuestions = () => {
+        questionsWithLastAttempt.sort((a,b) => {
+            // is there a better way to sort? The two tiered structure makes it hard to sort with params
+            // TODO: maybe use a flat struct with question and attempt combined
+            const sorDirSign = (sortDir === SORT_DIR.ASC) ? 1 : -1;
 
-    //     getQuestions()
+            if (sortColumn === 'title') {
+                const compareResult = a.question.title.localeCompare(b.question.title)
+                return  compareResult * sorDirSign;
+            } else if (sortColumn === 'date') {
+                console.log('sort by date')
+                if (!(a.lastAttempt?.date)) {
+                    return 1
+                }
 
-    // }, [])
+                if (!(b.lastAttempt?.date)) {
+                    return -1
+                }
 
-    // console.log('questinos: ', questions)
+                if (a.lastAttempt.date > b.lastAttempt.date) {
+                    return 1 * sorDirSign
+                } else if (a.lastAttempt.date < b.lastAttempt.date) {
+                    return -1 * sorDirSign;
+                } else {
+                    return 0;
+                }
+ 
+            } else if (sortColumn === 'retakeDate') {
+                if (!(a.lastAttempt?.date && a.lastAttempt.suggestedWaitDuration)) {
+                    return 1
+                }
 
-    
+                if (!(b.lastAttempt?.date && b.lastAttempt.suggestedWaitDuration)) {
+                    return -1
+                }
+
+                // TODO: Compute retake date somwhere else and so don't compute it each comparison
+                const aRetakeDate = computeRetakeDate(a.lastAttempt.date, a.lastAttempt.suggestedWaitDuration);
+                const bRetakeDate = computeRetakeDate(b.lastAttempt.date, b.lastAttempt.suggestedWaitDuration);
+
+                if (aRetakeDate > bRetakeDate) {
+                    return 1 * sorDirSign
+                } else if (aRetakeDate < bRetakeDate) {
+                    return -1 * sorDirSign;
+                } else {
+                    return 0;
+                }
+
+            } else if (sortColumn === 'importance') {
+                if (!(a.question.importance)) {
+                    return 1;
+                }
+
+                if (!(b.question.importance)) {
+                    return -1;
+                }
+
+                const compareResult = a.question.importance - b.question.importance
+
+                return compareResult * sorDirSign;
+
+            } else if (sortColumn === 'performance') {
+                if (!(a.lastAttempt?.performance)) {
+                    return 1;
+                }
+
+                if (!(b.lastAttempt?.performance)) {
+                    return -1;
+                }
+
+                //TODO: change this with another performance thing
+                const aPerformanceVal = getDsaPerformanceRating(a.lastAttempt!.performance as DsaPerformance ) 
+                const bPerformanceVal = getDsaPerformanceRating(b.lastAttempt!.performance as DsaPerformance) 
+
+                return (aPerformanceVal! - bPerformanceVal!) * sorDirSign
+
+            } else {
+                return 0;
+            }
+            
+        })
+    }
+    console.log('sort column: ', sortColumn)
+
+    sortQuestions()
+
+    const sortColumnOptions = Array.from(sortColumns.entries()).map(([key, value]) => {
+        console.log('key: ', key)
+        return (
+            <option key={key} value={key}>{value.label}</option>
+
+        )
+    } )
+
+    const handleChangeSortDirection = () => {
+        if (sortDir === SORT_DIR.ASC) {
+            setSortDir(SORT_DIR.DESC)
+        } else {
+            setSortDir(SORT_DIR.ASC)
+        }
+    }
+
     const questionRowDisplay = questionsWithLastAttempt?.map(({question, lastAttempt}) => {
         let retakeDate: Date | null = null;
         if (lastAttempt?.date && lastAttempt.suggestedWaitDuration) {
-            retakeDate = new Date(lastAttempt?.date)
-            retakeDate.setDate(lastAttempt.date.getDate() + lastAttempt.suggestedWaitDuration)
+            retakeDate = computeRetakeDate(lastAttempt.date, lastAttempt.suggestedWaitDuration)
         }
         
         // retakeDate?.setDate(retakeDate.getDate() + question?.suggestedWaitDuration)
@@ -77,6 +155,9 @@ const QuestionsPage: React.FC = () => {
             </tr>
         )
     })
+
+    
+
     console.log('error: ', error)
 
     if (isLoading) {
@@ -86,9 +167,23 @@ const QuestionsPage: React.FC = () => {
     return (
         <div>
             <h1>Questions</h1>
-
-            
+ 
             {error && <Alert message={error.message} type={AlertTypes.Error} />}
+
+            <div>
+                <select onChange={(event) => setSortColumn(event.target.value)}>
+                    {sortColumnOptions}   
+                    
+                </select>
+
+                <button onClick={handleChangeSortDirection}>
+                    {sortDir}
+                </button>
+
+            </div>
+            
+
+
 
             <table>
                 <thead>
@@ -123,13 +218,3 @@ const QuestionsPage: React.FC = () => {
 export default QuestionsPage;
 
 //Move to separatef ile
-
-const QuestionsTable: React.FC = () => {
-
-
-    return (
-        <table>
-
-        </table>
-    )
-}

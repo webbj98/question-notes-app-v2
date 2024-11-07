@@ -23,7 +23,7 @@ export type Importance = 1 | 2 | 3| 4 | 5;
 // opt means 'optimal'
 export type DsaPerformance = 'noIdea' | 'nonOptTrivial' | 'partialOpt' | 'nonOptAccepted' | 'opt' | 'optConfident' | 'mastered';
 
-export type FrontEndPerformance = 'noIdea' | 'nonOptTrivial' | 'gotIt' | 'gotMain'
+export type FrontEndPerformance = 'noIdea' | 'someFeatures' | 'coreFeatures' | 'confidentCoreFeatures' | 'polish' | 'confidentPolish';
 
 // Will be a combination of all perforamnce types
 export type Performance = DsaPerformance | FrontEndPerformance;
