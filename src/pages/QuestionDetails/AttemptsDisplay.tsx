@@ -1,10 +1,7 @@
-import { Attempt } from '../../../shared/typings/model';
-import { formateDate } from '../../util';
+import { AttemptWithoutQuestion } from '../../../shared/typings/model';
 import './QuestionDetailsPage.css';
 
-const AttemptCard: React.FC<{attempt: Attempt}> = ({attempt}) => {
-    console.log('attempt date: ', typeof attempt.date)
-    
+const AttemptCard: React.FC<{attempt: AttemptWithoutQuestion}> = ({attempt}) => {    
     return (
         <div>
             {/* <p>Date: {attempt.date.toDateString()}</p> */}
@@ -17,8 +14,7 @@ const AttemptCard: React.FC<{attempt: Attempt}> = ({attempt}) => {
     )
 }
 
-const AttemptsDisplay: React.FC<{attempts: Attempt[]}> = ({attempts}) => {
-    
+const AttemptsDisplay: React.FC<{attempts: AttemptWithoutQuestion[]}> = ({attempts}) => {
     const attemptsDisplay = attempts.map((attempt) => <AttemptCard attempt={attempt}/>)
 
     return (

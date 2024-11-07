@@ -1,12 +1,10 @@
 import express, {ErrorRequestHandler} from 'express';
 import cors from 'cors';
 // import {Client} from 'pg';
-import { toNullableString } from './utils.js';
 import { connectToDb, getQuestionsWithLastAttempt } from './dbManager';
 import {API_ROUTES} from '../../shared/routes.js'
 import { CreateAttemptInput, CreateQuestionInput } from '../../shared/typings/queryInputs.ts';
 import { createAttempts, createQuestion, editQuestion, getQuestionsByIdWithAttempts } from './dbManager.ts';
-import { Attempt } from '../../shared/typings/model.ts';
 const app = express();
 const port = 3000;
 
@@ -36,20 +34,6 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 
     // message: err.message || 'Internal Server Error',
 }
-
-
-
-
-//TODO: should I make separte filel for queries
-// app.get('/questions', async (req, res) => {
-//     console.log('in questions')
-//     const data = await db.query('SELECT * FROM questions');
-//     console.log('getting the main page')
-    
-//     res.status(200).json({
-//         data: data.rows
-//     })
-// });
 
 app.post('/questions', async (req, res, next) => {
     try {
@@ -92,104 +76,16 @@ app.get(`${API_ROUTES.questions}/with-last-attempt`, async (req, res, next) => {
     // res.status(200).json({message: 'mm'})
 })
 
-
-// app.get('/questions/:id', async (req, res) => {
-//     const id = req.params.id;
-//     const data = await db.query("SELECT * from questions q WHERE q.id = $1", [id]);
-//     res.status(200).json({
-//         data: data
-//     })
-// })
-
 app.get('/questions/:id/with-attempts', async (req, res) => {
     const id = req.params.id;
     // const data = await db.query('SELECT * FROM questions q INNER JOIN attempts ON q.id = attempts.question_id WHERE q.id = $1;', [id]);
     const data = await getQuestionsByIdWithAttempts({id: Number(id)})
 
-    const dataRows = data.rows;
-    const dataRowsFirstElem = dataRows[0];
-
-    const questionData = {
-        id: dataRowsFirstElem?.id,
-        title: dataRowsFirstElem?.title,
-        time: dataRowsFirstElem?.time,
-        type: dataRowsFirstElem?.type,
-        importance: dataRowsFirstElem?.importance,
-        url: dataRowsFirstElem?.url,
-        notes: dataRowsFirstElem?.notes
-    }
-
-    const attemptsData = new Array<Attempt>();
-    dataRows.forEach(({attempt_id, date, time_taken, performance, question_id, suggested_wait_duration}) => {
-        // If no attempt_id, then there is no attempt on the question 
-        if (attempt_id) {
-            attemptsData.push({
-                id: attempt_id,
-                date: date,
-                timeTaken: time_taken, 
-                performance: performance,
-                questionId: question_id,
-                suggestedWaitDuration: suggested_wait_duration,
-            })
-        }
-        
-
-    })
-    console.log('attemptsdata: ', attemptsData)
-
     res.status(200).json({
-        questionData: questionData,
-        attemptsData: attemptsData,
+        data
         
     })
 })
-
-// app.get('/questions/:id/with-last-attempt', async (req, res) => {
-//     console.log('in here')
-//     const id  = req.params.id;
-
-//     try {
-//         const data = await db.query(`
-//             SELECT q.*, a.id as attempt_id, a.date, a.time_taken, a.performance, a.suggested_wait_duration
-//             FROM questions q 
-//             INNER JOIN attempts as a ON q.id = a.question_id 
-//             WHERE q.id = $1
-//             ORDER BY a.date DESC LIMIT 1`
-//             , [id]
-//         );
-
-//         const dataRow = data.rows[0];
-
-
-//         const questionData = {
-//             id: dataRow.id,
-//             title: dataRow.title,
-//             time: dataRow.time,
-//             type: dataRow.type,
-//             importance: dataRow.importance,
-//             url: dataRow.url,
-//             notes: dataRow.notes
-//         }
-
-//         const attemptData = {
-//             id: dataRow.attempt_id,
-//             date: dataRow.date,
-//             timeTaken: dataRow.time_taken, 
-//             performance: dataRow.performance,
-//             suggestedWaitDuration: dataRow.suggested_wait_duration,
-//         }
-//         res.status(200).json({
-//             questionData: questionData,
-//             attemptData: attemptData,
-//         })
-
-
-//     } catch (error) {
-//         throw new Error('Error from server: ' +  error)
-//     }
-// })
-
-
 
 app.patch('/questions/:id', async (req, res) => {
     const id = Number(req.params.id);
@@ -218,6 +114,27 @@ app.patch('/questions/:id', async (req, res) => {
         if (args.type) {
             arguements.push(args.type);
             updateSegments.push(typeSegment);
+            argNum++;
+        }
+
+        const importanceSegment = `importance = $${argNum}`;
+        if (args.importance) {
+            arguements.push(args.importance);
+            updateSegments.push(importanceSegment);
+            argNum++;
+        }
+
+        const urlSegment = `url = $${argNum}`;
+        if (args.url) {
+            arguements.push(args.url);
+            updateSegments.push(urlSegment);
+            argNum++;
+        }
+
+        const notesSegment = `notes = $${argNum}`;
+        if (args.notes) {
+            arguements.push(args.notes);
+            updateSegments.push(notesSegment);
             argNum++;
         }
 

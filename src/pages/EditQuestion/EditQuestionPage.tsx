@@ -140,7 +140,7 @@ const EditQuestionPage: React.FC = () => {
 
                 <div>
                     <label htmlFor="notes">Notes</label>
-                    <input id="notes" type="textarea" value={notes} onChange={(event) => setNotes(event.target.value) } />
+                    <textarea id="notes" value={notes} onChange={(event) => setNotes(event.target.value) } />
                 </div>
 
                 <button type="submit">Submit</button>

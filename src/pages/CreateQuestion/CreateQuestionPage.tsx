@@ -4,7 +4,6 @@ import ErrorBox from "../../components/Alert";
 import Alert from "../../components/Alert";
 import { AlertTypes, Importance } from "../../../shared/typings/model";
 import { getImportanceMapEntries, getQuestion, getQuestionTypeLabelEntries } from '../../../shared/typings/mappings'
-import CreateAttempt from "../QuestionDetails/CreateAttempt";
 
 const CreateQuestionPage: React.FC = () => {
 
