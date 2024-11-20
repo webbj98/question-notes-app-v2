@@ -138,6 +138,14 @@ export async function getQuestionsByIdWithAttempts({id}: GetByIdInput): Promise<
     };
 }
 
+export async function deleteQuestion({id}: GetByIdInput): Promise<Question> {
+    const queryResult = await db.query<Question>('DELETE FROM questions WHERE id= $1 RETURNING *',
+        [id]
+    );
+
+    return queryResult.rows[0];
+}
+
 export async function createAttempts({date, timeTaken, performance, questionId, suggestedWaitDuration}: CreateAttemptInput): Promise<Attempt> {
     const queryResult = 
         await db.query<Attempt>('INSERT INTO attempts (date, time_taken, performance, question_id, suggested_wait_duration) VALUES($1, $2, $3, $4, $5) RETURNING *',
@@ -145,8 +153,15 @@ export async function createAttempts({date, timeTaken, performance, questionId, 
         );
 
     console.log("queryResult: ", queryResult.rows);
-    return queryResult.rows[0];
+    return queryResuetlt.rows[0];
+}
 
+export async function deleteAttempts({id}: GetByIdInput): Promise<Attempt> {
+    const queryResult = await db.query<Attempt>('DELETE FROM attempts WHERE id=$1 RETURNING *',
+        [id]
+    );
+
+    return queryResult.rows[0];
 }
 
 // export async function editQuestion(inputs: EditQuestionInput, fullQuery: string, arguements: (string | number)[]) {

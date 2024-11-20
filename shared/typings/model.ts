@@ -28,7 +28,11 @@ export type FrontEndPerformance = 'noIdea' | 'someFeatures' | 'coreFeatures' | '
 // Will be a combination of all perforamnce types
 export type Performance = DsaPerformance | FrontEndPerformance;
 
+
+
 export type QuestionType = 'dsa' |  'front-end';
+
+
 
 export enum AlertTypes {
     Success = 'success',

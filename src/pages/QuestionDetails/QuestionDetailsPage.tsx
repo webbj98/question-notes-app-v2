@@ -1,20 +1,24 @@
 import {useState, useEffect} from 'react'
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {Question, Attempt, AttemptWithoutQuestion} from '../../../shared/typings/model';
 import './QuestionDetailsPage.css'
 import CreateAttempt from './CreateAttempt';
 import AttemptDisplay from './AttemptsDisplay';
 import { getQuestionTypeLabel } from '../../../shared/typings/mappings';
-import { useFetchQuestionAndAttempts } from '../../http';
+import { useDeleteAttempt, useDeleteQuestion, useFetchQuestionAndAttempts } from '../../http';
+import Alert from '../../components/Alert';
 const QuestionDetailsPage: React.FC = () => {
     // const [question, setQuestion] = useState<Question | null>(null)
     // const [attempts, setAttempts] = useState<Attempt[]>([]);
     // const [errorMsg, setErrorMsg] = useState('');
-    const [successSubmit, setSuccessSubmit] = useState(false)
 
-    
     const {id} = useParams();
     const { question, attempts, error, isLoading, setAttempts } = useFetchQuestionAndAttempts(id)
+    const { deleteQuestion, isLoading: deleteIsLoading, error: deleteError } = useDeleteQuestion(id)
+    const {deleteAttempt, isLoading: deleteAttemptIsLoading, error: deleteAttemptError } = useDeleteAttempt()
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const navigate = useNavigate();
+
 
     const handleCreateAttempt = (attempt: AttemptWithoutQuestion) => {
         setAttempts((prevAttempts) => {
@@ -22,48 +26,12 @@ const QuestionDetailsPage: React.FC = () => {
         })
     }
 
-    // useEffect(() => {
-    //     async function getQuestionAndAttempts() {
-    //         try {
-    //             const response = await fetch(`http://localhost:3000/questions/${id}/with-attempts`, {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                 }
-    //             });
-    
-    //             if (!response.ok) {
-    //                 const errResponse = await response.json();
-    //                 throw new Error(errResponse);
-    
-    //             } else {
-    //                 const result = await response.json();
-    
-    //                 setQuestion(result.data.question)
-    //                 const attemptsData = result.data.attempts;
-    //                 const attemptsWithDatesObj = attemptsData.map((attempt) => {
-    //                     const dateObj = new Date(attempt.date)
-    //                     return {
-    //                         ...attempt,
-    //                         date: dateObj
-    //                     }
-    
-    //                 })
-                    
-    //                 setAttempts(attemptsWithDatesObj)
-    //             }
-                
-    //         } catch (error) {
-    //             console.log('error: ', error)
-    //             setErrorMsg(error)
-                
-    //         }
-            
-            
-    //     }
-
-    //     getQuestionAndAttempts();
-    // }, [id])
+    const handleDeleteQuestion = async () => {
+        await deleteQuestion(id);
+        navigate(-1)
+        
+        console.log('can DELETE');
+    } 
 
     console.log('question notes: ', question?.notes)
     if (isLoading) {
@@ -72,13 +40,12 @@ const QuestionDetailsPage: React.FC = () => {
 
     return (
         <div>
-
-            
             <h1>Question Details</h1>
 
             <h2>Title: {question?.title} </h2>
 
-            <button> <Link to='edit'>Edit Button</Link></button>
+            <button> <Link to='edit'>Edit Question</Link></button>
+            <button onClick={handleDeleteQuestion}>Delete Question</button>
 
             <div className='details'>
                 <label>Time: {question?.time} minutes</label>
@@ -88,12 +55,9 @@ const QuestionDetailsPage: React.FC = () => {
                 <p>{question?.notes}</p>
             </div>
 
-            <AttemptDisplay attempts={attempts} />
+            <AttemptDisplay attempts={attempts} onDelete={deleteAttempt}/>
             
             {id && <CreateAttempt questionId={Number(id)} onCreateAttempt={handleCreateAttempt} />}
-
-            
-
         </div>
     )
 

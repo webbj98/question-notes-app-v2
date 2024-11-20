@@ -124,3 +124,72 @@ export function useFetchQuestionAndAttempts(id: number) {
         setAttempts,
     }
 }
+
+export function useDeleteQuestion(id: number) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState();
+    const deleteQuestion = async () => {
+        try {
+            setIsLoading(true);
+            // setError();
+            // TODO: use the enum for first part
+            const response = await fetch(`http://localhost:3000/questions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                const errResponse = await response.json();
+                throw new Error(errResponse);
+            }             
+        } catch (error) {
+            setError(error)
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    return {
+        deleteQuestion,
+        isLoading,
+        error
+    }
+}
+
+export function useDeleteAttempt() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState();
+
+    const deleteAttempt = async (id: number) => {
+        try {
+            setIsLoading(true);
+
+            const response = await fetch(`http://localhost:3000/attempts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                const errResponse = await response.json();
+                throw new Error(errResponse);
+            }     
+            
+        } catch (error) {
+            setError(error)
+            
+        } finally {
+            setIsLoading(false)
+
+        }
+    }
+
+    return {
+        deleteAttempt,
+        isLoading,
+        error
+    }
+}

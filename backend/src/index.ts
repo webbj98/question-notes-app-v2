@@ -4,7 +4,7 @@ import cors from 'cors';
 import { connectToDb, getQuestionsWithLastAttempt } from './dbManager';
 import {API_ROUTES} from '../../shared/routes.js'
 import { CreateAttemptInput, CreateQuestionInput } from '../../shared/typings/queryInputs.ts';
-import { createAttempts, createQuestion, editQuestion, getQuestionsByIdWithAttempts } from './dbManager.ts';
+import { createAttempts, createQuestion, deleteAttempts, deleteQuestion, editQuestion, getQuestionsByIdWithAttempts } from './dbManager.ts';
 const app = express();
 const port = 3000;
 
@@ -160,6 +160,15 @@ app.patch('/questions/:id', async (req, res) => {
 
 })
 
+app.delete('/questions/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    const data = await deleteQuestion({id});
+
+    res.status(200).json({
+        data
+    });
+})
+
 app.post('/attempts', async (req, res) => {
     const inputs: CreateAttemptInput = req.body
     // console.log('suggestedWaitDuration: ', suggestedWaitDuration)
@@ -170,6 +179,15 @@ app.post('/attempts', async (req, res) => {
     // console.log('queryResult row count: ', queryResult.rows)
     
     res.status(200).json({newAttempt})  
+})
+
+app.delete('/attempts/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    const data = await deleteAttempts({id});
+
+    res.status(200).json({
+        data
+    });
 })
 
 app.use((req, res, next) => {

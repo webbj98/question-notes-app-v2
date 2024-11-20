@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import './QuestionsPage.css';
 import { getDsaPerformanceLabel, getDsaPerformanceRating, getQuestionTypeLabel } from "../../../shared/typings/mappings";
 import Alert from "../../components/Alert";
-import { AlertTypes, DsaPerformance } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance, QuestionWithAttempts, QuestionWithLastAttempt } from "../../../shared/typings/model";
 import { useFetchQuestionsWithLastAttempt } from "../../http";
 import { computeRetakeDate } from "../../util";
 
@@ -21,15 +21,16 @@ enum SORT_DIR {
 }
 
 const QuestionsPage: React.FC = () => {
-
-    // const [questions, setQuestions] = useState([]);
-    // const [errorMsg, setErrorMsg] = useState('');
     const {questionsWithLastAttempt, error, isLoading} = useFetchQuestionsWithLastAttempt()
-    const [sortColumn, setSortColumn] = useState('title')
-    const [sortDir, setSortDir] = useState(SORT_DIR.ASC)
+    const [sortColumn, setSortColumn] = useState('title');
+    const [sortDir, setSortDir] = useState(SORT_DIR.ASC);
+    const [searchText, setSearchText] = useState('');
 
-    const sortQuestions = () => {
-        questionsWithLastAttempt.sort((a,b) => {
+    const searchedQuestionsWithLastAttempt = questionsWithLastAttempt.filter((questionLastAttempt) => questionLastAttempt.question.title.includes(searchText))
+ 
+    const sortQuestions = (inputQuestionsWithLastAttempt: QuestionWithLastAttempt[]) => {
+        
+        inputQuestionsWithLastAttempt.sort((a,b) => {
             // is there a better way to sort? The two tiered structure makes it hard to sort with params
             // TODO: maybe use a flat struct with question and attempt combined
             const sorDirSign = (sortDir === SORT_DIR.ASC) ? 1 : -1;
@@ -38,7 +39,6 @@ const QuestionsPage: React.FC = () => {
                 const compareResult = a.question.title.localeCompare(b.question.title)
                 return  compareResult * sorDirSign;
             } else if (sortColumn === 'date') {
-                console.log('sort by date')
                 if (!(a.lastAttempt?.date)) {
                     return 1
                 }
@@ -110,12 +110,15 @@ const QuestionsPage: React.FC = () => {
             
         })
     }
+
+
+
+    sortQuestions(searchedQuestionsWithLastAttempt);
     console.log('sort column: ', sortColumn)
 
-    sortQuestions()
+    // sortQuestions()
 
     const sortColumnOptions = Array.from(sortColumns.entries()).map(([key, value]) => {
-        console.log('key: ', key)
         return (
             <option key={key} value={key}>{value.label}</option>
 
@@ -130,7 +133,7 @@ const QuestionsPage: React.FC = () => {
         }
     }
 
-    const questionRowDisplay = questionsWithLastAttempt?.map(({question, lastAttempt}) => {
+    const questionRowDisplay = searchedQuestionsWithLastAttempt?.map(({question, lastAttempt}) => {
         let retakeDate: Date | null = null;
         if (lastAttempt?.date && lastAttempt.suggestedWaitDuration) {
             retakeDate = computeRetakeDate(lastAttempt.date, lastAttempt.suggestedWaitDuration)
@@ -171,6 +174,8 @@ const QuestionsPage: React.FC = () => {
             {error && <Alert message={error.message} type={AlertTypes.Error} />}
 
             <div>
+
+                <input value={searchText} onChange={(event) => setSearchText(event.target.value)} />
                 <select onChange={(event) => setSortColumn(event.target.value)}>
                     {sortColumnOptions}   
                     
@@ -182,9 +187,6 @@ const QuestionsPage: React.FC = () => {
 
             </div>
             
-
-
-
             <table>
                 <thead>
                     <tr className="table-row">
