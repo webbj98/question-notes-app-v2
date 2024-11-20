@@ -5,7 +5,7 @@ import Alert from '../../components/Alert';
 import { getDsaPerfomanceMapLabelEntries } from '../../../shared/typings/mappings';
 import { AlertTypes, Attempt } from '../../../shared/typings/model';
 
-const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: Attempt) => void}> = ({questionId, onCreateAttempt}) => {
+const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: () => void}> = ({questionId, onCreateAttempt}) => {
     const [date, setDate] = useState('');
     const [timeTaken, setTimeTaken] = useState<number>();
     // performance
@@ -40,7 +40,8 @@ const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: (attempt: At
                 console.log('creating date: ', new Date(newAttempt.date))
                 newAttempt.date = new Date(newAttempt.date)
                 setSubmitSucess(true);
-                onCreateAttempt(res.newAttempt as Attempt)
+                onCreateAttempt();
+                // onCreateAttempt(res.newAttempt as Attempt)
             } else {
                 console.log('error from response: ', response);
             }

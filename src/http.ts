@@ -72,48 +72,53 @@ export function useFetchQuestionAndAttempts(id: number) {
     const [error, setError] = useState();
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        async function getQuestionAndAttempts() {
-            setIsLoading(true);
-            try {
-                const response = await fetch(`http://localhost:3000/questions/${id}/with-attempts`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-    
-                if (!response.ok) {
-                    const errResponse = await response.json();
-                    throw new Error(errResponse);
-    
-                } else {
-                    const result = await response.json();
-    
-                    setQuestion(result.data.question)
-                    const attemptsData = result.data.attempts;
-                    const attemptsWithDatesObj = attemptsData.map((attempt) => {
-                        const dateObj = new Date(attempt.date)
-                        return {
-                            ...attempt,
-                            date: dateObj
-                        }
-    
-                    })
-                    
-                    setAttempts(attemptsWithDatesObj)
-                }
-                
-            } catch (error) {
-                console.log('error: ', error)
-                setError(error);
-                
-            } finally {
-                setIsLoading(false);
-            }
-        }
 
-        getQuestionAndAttempts();
+    const getQuestionAndAttempts = async(id: number) => {
+        console.log('passed id: ', id)
+        setIsLoading(true);
+        try {
+            const response = await fetch(`http://localhost:3000/questions/${id}/with-attempts`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                const errResponse = await response.json();
+                throw new Error(errResponse);
+
+            } else {
+                const result = await response.json();
+                console.log('result: ', result)
+
+                setQuestion(result.data.question)
+                const attemptsData = result.data.attempts;
+                const attemptsWithDatesObj = attemptsData.map((attempt) => {
+                    const dateObj = new Date(attempt.date)
+                    return {
+                        ...attempt,
+                        date: dateObj
+                    }
+                })
+                
+                console.log('attemptsWithDatesObj: ', attemptsWithDatesObj)
+                setAttempts(attemptsWithDatesObj)
+            }
+            
+        } catch (error) {
+            console.log('error: ', error)
+            setError(error);
+            
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+
+        getQuestionAndAttempts(id);
+        // console.log('refetched attempt: ', attempts)
     }, [id])
 
     return {
@@ -121,7 +126,7 @@ export function useFetchQuestionAndAttempts(id: number) {
         attempts,
         error,
         isLoading,
-        setAttempts,
+        refetch: getQuestionAndAttempts,
     }
 }
 

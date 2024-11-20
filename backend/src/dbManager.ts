@@ -105,6 +105,7 @@ export async function getQuestionsByIdWithAttempts({id}: GetByIdInput): Promise<
     );
 
     const dataDataRows = queryResult.rows
+    // console.log('dataRows: ', dataDataRows)
     const dataRowsFirstElem = dataDataRows?.[0] || [];
 
     const questionData = {
@@ -153,7 +154,7 @@ export async function createAttempts({date, timeTaken, performance, questionId, 
         );
 
     console.log("queryResult: ", queryResult.rows);
-    return queryResuetlt.rows[0];
+    return queryResult.rows[0];
 }
 
 export async function deleteAttempts({id}: GetByIdInput): Promise<Attempt> {

@@ -13,25 +13,33 @@ const QuestionDetailsPage: React.FC = () => {
     // const [errorMsg, setErrorMsg] = useState('');
 
     const {id} = useParams();
-    const { question, attempts, error, isLoading, setAttempts } = useFetchQuestionAndAttempts(id)
+    const { question, attempts, error, isLoading, refetch: refetchQuestionsAndAttempts } = useFetchQuestionAndAttempts(id)
     const { deleteQuestion, isLoading: deleteIsLoading, error: deleteError } = useDeleteQuestion(id)
     const {deleteAttempt, isLoading: deleteAttemptIsLoading, error: deleteAttemptError } = useDeleteAttempt()
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const navigate = useNavigate();
 
 
-    const handleCreateAttempt = (attempt: AttemptWithoutQuestion) => {
-        setAttempts((prevAttempts) => {
-            return [...prevAttempts, attempt]
-        })
+    const handleCreateAttempt = async () => {
+        // setAttempts((prevAttempts) => {
+        //     return [...prevAttempts, attempt]
+        // })
+        console.log('before handle ')
+        await refetchQuestionsAndAttempts(id)
+        console.log('refetched atempt: ', attempts )
+        
     }
 
     const handleDeleteQuestion = async () => {
         await deleteQuestion(id);
         navigate(-1)
+    }
+
+    const handleDeleteAttempt = async(attemptId: number) => {
+        await deleteAttempt(attemptId);
+        await refetchQuestionsAndAttempts(id)
         
-        console.log('can DELETE');
-    } 
+    }
 
     console.log('question notes: ', question?.notes)
     if (isLoading) {
@@ -55,7 +63,7 @@ const QuestionDetailsPage: React.FC = () => {
                 <p>{question?.notes}</p>
             </div>
 
-            <AttemptDisplay attempts={attempts} onDelete={deleteAttempt}/>
+            <AttemptDisplay attempts={attempts} onDelete={handleDeleteAttempt}/>
             
             {id && <CreateAttempt questionId={Number(id)} onCreateAttempt={handleCreateAttempt} />}
         </div>
