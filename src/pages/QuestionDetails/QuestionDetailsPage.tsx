@@ -8,26 +8,16 @@ import { getQuestionTypeLabel } from '../../../shared/typings/mappings';
 import { useDeleteAttempt, useDeleteQuestion, useFetchQuestionAndAttempts } from '../../http';
 import Alert from '../../components/Alert';
 const QuestionDetailsPage: React.FC = () => {
-    // const [question, setQuestion] = useState<Question | null>(null)
-    // const [attempts, setAttempts] = useState<Attempt[]>([]);
-    // const [errorMsg, setErrorMsg] = useState('');
-
     const {id} = useParams();
     const { question, attempts, error, isLoading, refetch: refetchQuestionsAndAttempts } = useFetchQuestionAndAttempts(id)
     const { deleteQuestion, isLoading: deleteIsLoading, error: deleteError } = useDeleteQuestion(id)
     const {deleteAttempt, isLoading: deleteAttemptIsLoading, error: deleteAttemptError } = useDeleteAttempt()
-    const [submitSuccess, setSubmitSuccess] = useState(false);
+    // const [successMsg, setSuccessMsg] = useState('');
     const navigate = useNavigate();
 
-
     const handleCreateAttempt = async () => {
-        // setAttempts((prevAttempts) => {
-        //     return [...prevAttempts, attempt]
-        // })
         console.log('before handle ')
         await refetchQuestionsAndAttempts(id)
-        console.log('refetched atempt: ', attempts )
-        
     }
 
     const handleDeleteQuestion = async () => {
@@ -37,11 +27,9 @@ const QuestionDetailsPage: React.FC = () => {
 
     const handleDeleteAttempt = async(attemptId: number) => {
         await deleteAttempt(attemptId);
-        await refetchQuestionsAndAttempts(id)
-        
+        await refetchQuestionsAndAttempts(id);
     }
 
-    console.log('question notes: ', question?.notes)
     if (isLoading) {
         return <h1>Loading...</h1>
     }
@@ -53,7 +41,7 @@ const QuestionDetailsPage: React.FC = () => {
             <h2>Title: {question?.title} </h2>
 
             <button> <Link to='edit'>Edit Question</Link></button>
-            <button onClick={handleDeleteQuestion}>Delete Question</button>
+            <button onClick={handleDeleteQuestion} disabled={attempts.length > 0}>Delete Question</button>
 
             <div className='details'>
                 <label>Time: {question?.time} minutes</label>
@@ -65,7 +53,7 @@ const QuestionDetailsPage: React.FC = () => {
 
             <AttemptDisplay attempts={attempts} onDelete={handleDeleteAttempt}/>
             
-            {id && <CreateAttempt questionId={Number(id)} onCreateAttempt={handleCreateAttempt} />}
+            {question && <CreateAttempt question={question} onCreateAttempt={handleCreateAttempt} />}
         </div>
     )
 

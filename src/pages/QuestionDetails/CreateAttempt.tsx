@@ -1,11 +1,12 @@
-import { FormEvent, useState, useEffect} from 'react';
+import { FormEvent, useState} from 'react';
 
 import './QuestionDetailsPage.css';
 import Alert from '../../components/Alert';
 import { getDsaPerfomanceMapLabelEntries } from '../../../shared/typings/mappings';
-import { AlertTypes, Attempt } from '../../../shared/typings/model';
+import { AlertTypes, Attempt, Question } from '../../../shared/typings/model';
+import { getPerformanceMapEntriesByQuestionType } from '../../../shared/typings/typeUtil';
 
-const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: () => void}> = ({questionId, onCreateAttempt}) => {
+const CreateAttempt: React.FC<{question: Question, onCreateAttempt: () => void}> = ({question, onCreateAttempt}) => {
     const [date, setDate] = useState('');
     const [timeTaken, setTimeTaken] = useState<number>();
     // performance
@@ -26,7 +27,7 @@ const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: () => void}>
                     date: date,
                     timeTaken: timeTaken,
                     performance: performance,
-                    questionId: questionId,
+                    questionId: question.id,
                     suggestedWaitDuration: suggestedWaitDuration
                 })
 
@@ -41,19 +42,17 @@ const CreateAttempt: React.FC<{questionId: number, onCreateAttempt: () => void}>
                 newAttempt.date = new Date(newAttempt.date)
                 setSubmitSucess(true);
                 onCreateAttempt();
-                // onCreateAttempt(res.newAttempt as Attempt)
             } else {
                 console.log('error from response: ', response);
             }
             
         } catch (error) {
             console.log('error: ', error)
-            
         }
-
     }
 
-    const performanceCategoryDisplay = [...getDsaPerfomanceMapLabelEntries()].map(([performanceKey, label]) => <option value={performanceKey}>{label}</option>)
+    const performanceMapEntries = getPerformanceMapEntriesByQuestionType(question.type) || [];
+    const performanceCategoryDisplay = [...performanceMapEntries].map(([performanceKey, label]) => <option key={performanceKey} value={performanceKey}>{label}</option>);
     return (
         <div>
             <h2>Create Attempt</h2>

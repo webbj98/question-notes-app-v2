@@ -18,3 +18,22 @@ th {
     padding: 4px;
     /* border: 1px solid black; */
 }
+
+.retake-date-past {
+}
+
+.search-filter-bar {
+    display: flex;
+    column-gap: 12px;
+    justify-content: center;
+    padding: 4px;
+    height: 35px;
+    margin-bottom: 8px;
+}
+
+.sort-dir-button {
+    display: flex;
+    align-items: center;
+    text-align: end;
+    border: 1px solid black;
+}

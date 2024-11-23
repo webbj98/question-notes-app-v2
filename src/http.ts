@@ -3,7 +3,7 @@
 //     const response = await fetch('http://localhost:3000/')
 
 import {useState, useEffect} from 'react';
-import { Attempt, AttemptWithoutQuestion, LastAttempt, Question, QuestionWithLastAttempt } from "../shared/typings/model";
+import { AttemptWithoutQuestion, Question, QuestionWithLastAttempt } from "../shared/typings/model";
 import { API_ROUTES } from '../shared/routes';
 
 export function useFetchQuestionsWithLastAttempt() {
@@ -116,9 +116,7 @@ export function useFetchQuestionAndAttempts(id: number) {
     }
 
     useEffect(() => {
-
         getQuestionAndAttempts(id);
-        // console.log('refetched attempt: ', attempts)
     }, [id])
 
     return {
@@ -133,6 +131,7 @@ export function useFetchQuestionAndAttempts(id: number) {
 export function useDeleteQuestion(id: number) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState();
+    const [isSuccess, setIsSuccess] = useState(false)
     const deleteQuestion = async () => {
         try {
             setIsLoading(true);

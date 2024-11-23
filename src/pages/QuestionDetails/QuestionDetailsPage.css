@@ -4,3 +4,10 @@
     text-align: left;
     row-gap: 8px;
 }
+
+.attempts-display {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    margin-bottom: 32px;
+}

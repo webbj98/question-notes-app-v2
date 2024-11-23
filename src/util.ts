@@ -1,6 +1,6 @@
-export function computeRetakeDate(date: Date, numDays: number): Date {
-    const retakeDate = new Date(date)
-    retakeDate.setDate(retakeDate.getDate() + numDays);
-    return retakeDate;
+export function addNumDays(date: Date, numDays: number): Date {
+    const newDate = new Date(date)
+    newDate.setDate(newDate.getDate() + numDays);
+    return newDate;
 
 }

@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import './QuestionsPage.css';
 import { getDsaPerformanceLabel, getDsaPerformanceRating, getQuestionTypeLabel } from "../../../shared/typings/mappings";
 import Alert from "../../components/Alert";
-import { AlertTypes, DsaPerformance, QuestionWithAttempts, QuestionWithLastAttempt } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance, QuestionType, QuestionWithAttempts, QuestionWithLastAttempt } from "../../../shared/typings/model";
 import { useFetchQuestionsWithLastAttempt } from "../../http";
-import { computeRetakeDate } from "../../util";
-
+import { addNumDays } from "../../util";
+import { NUM_DAYS_TIL_LATE} from "../../config"
+import {getPerformanceLabelByQuestionType} from '../../../shared/typings/typeUtil'
 const sortColumns = new Map([
     ['title', {label: 'Title', dataType: 'string'}],
     ['date', {label: 'Date', dataType: 'Date'}],
@@ -20,11 +21,15 @@ enum SORT_DIR {
     DESC = 'desc'
 }
 
+// TODO: replace with gettin actual QUestion types dynamically
+const QUESTION_TYPE_LIST: QuestionType[] = ['dsa', 'front-end']
+
 const QuestionsPage: React.FC = () => {
     const {questionsWithLastAttempt, error, isLoading} = useFetchQuestionsWithLastAttempt()
     const [sortColumn, setSortColumn] = useState('title');
     const [sortDir, setSortDir] = useState(SORT_DIR.ASC);
     const [searchText, setSearchText] = useState('');
+    const [questionTypeFilters, setQuestionTypeFilters] = useState<QuestionType[]>([...QUESTION_TYPE_LIST])
 
     const searchedQuestionsWithLastAttempt = questionsWithLastAttempt.filter((questionLastAttempt) => questionLastAttempt.question.title.includes(searchText))
  
@@ -111,12 +116,7 @@ const QuestionsPage: React.FC = () => {
         })
     }
 
-
-
     sortQuestions(searchedQuestionsWithLastAttempt);
-    console.log('sort column: ', sortColumn)
-
-    // sortQuestions()
 
     const sortColumnOptions = Array.from(sortColumns.entries()).map(([key, value]) => {
         return (
@@ -135,33 +135,41 @@ const QuestionsPage: React.FC = () => {
 
     const questionRowDisplay = searchedQuestionsWithLastAttempt?.map(({question, lastAttempt}) => {
         let retakeDate: Date | null = null;
-        if (lastAttempt?.date && lastAttempt.suggestedWaitDuration) {
-            retakeDate = computeRetakeDate(lastAttempt.date, lastAttempt.suggestedWaitDuration)
+        console.log('lastAttempt: ', lastAttempt)
+        if (lastAttempt?.date && !isNaN(lastAttempt.suggestedWaitDuration)) {
+            console.log('lastAttempt.suggestedWaitDuration: ', lastAttempt.suggestedWaitDuration)
+            retakeDate = addNumDays(lastAttempt.date, lastAttempt.suggestedWaitDuration)
         }
+
+        let retakeDateColor = '';
+
         
-        // retakeDate?.setDate(retakeDate.getDate() + question?.suggestedWaitDuration)
-
-        // console.log('question wait time: ', question.suggestedWaitDuration)
-
+        if (retakeDate) {
+            const retakeDateTime = retakeDate?.getTime();
+            const curDate = Date.now()
+            const retakeDateLateStart = addNumDays(retakeDate, NUM_DAYS_TIL_LATE).getTime()
+            if (curDate > retakeDateLateStart) {
+                retakeDateColor = 'red';
+            } else if (curDate < retakeDateLateStart && curDate > retakeDateTime ) {
+                retakeDateColor = 'green'
+            }
+        } 
+        
         return (
-            <tr>
+            <tr key={question.id}>
                 <td><Link to={`${question.id}`}>{question.title}</Link></td>
-                <td>{lastAttempt && getDsaPerformanceLabel(lastAttempt?.performance)}</td>
+                <td>{lastAttempt && getPerformanceLabelByQuestionType(question.type, lastAttempt?.performance)}</td>
                 <td>{lastAttempt?.date.toLocaleDateString()}</td>
                 <td>{lastAttempt?.timeTaken} / {question.time}</td>
                 <td>{getQuestionTypeLabel(question.type)}</td>
                 <td>{question.importance}</td>
                 <td>{question.url}</td>
                 <td>{lastAttempt?.suggestedWaitDuration}</td>
-                <td>{retakeDate?.toLocaleDateString()}</td>
+                <td style={{color: retakeDateColor}}>{retakeDate?.toLocaleDateString()}</td>
                 
             </tr>
         )
     })
-
-    
-
-    console.log('error: ', error)
 
     if (isLoading) {
         return <h1>Loading...</h1>
@@ -173,7 +181,7 @@ const QuestionsPage: React.FC = () => {
  
             {error && <Alert message={error.message} type={AlertTypes.Error} />}
 
-            <div>
+            <div className="search-filter-bar">
 
                 <input value={searchText} onChange={(event) => setSearchText(event.target.value)} />
                 <select onChange={(event) => setSortColumn(event.target.value)}>
@@ -181,7 +189,7 @@ const QuestionsPage: React.FC = () => {
                     
                 </select>
 
-                <button onClick={handleChangeSortDirection}>
+                <button className='sort-dir-button' onClick={handleChangeSortDirection}>
                     {sortDir}
                 </button>
 

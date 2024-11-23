@@ -21,18 +21,17 @@ export interface Attempt {
 export type Importance = 1 | 2 | 3| 4 | 5;
 
 // opt means 'optimal'
-export type DsaPerformance = 'noIdea' | 'nonOptTrivial' | 'partialOpt' | 'nonOptAccepted' | 'opt' | 'optConfident' | 'mastered';
+// Also, we can just export the array cause it's read-only
+export const DsaPerformances = ['noIdea', 'nonOptTrivial', 'partialOpt', 'nonOptAccepted', 'opt', 'optConfident', 'mastered'] as const;
+export type DsaPerformance = typeof DsaPerformances[number];
 
-export type FrontEndPerformance = 'noIdea' | 'someFeatures' | 'coreFeatures' | 'confidentCoreFeatures' | 'polish' | 'confidentPolish';
+export const FrontEndPerformances = ['noIdea', 'someFeatures', 'coreFeatures', 'confidentCoreFeatures', 'polish', 'confidentPolish'] as const; 
+export type FrontEndPerformance =  typeof FrontEndPerformances[number];
 
 // Will be a combination of all perforamnce types
 export type Performance = DsaPerformance | FrontEndPerformance;
 
-
-
 export type QuestionType = 'dsa' |  'front-end';
-
-
 
 export enum AlertTypes {
     Success = 'success',

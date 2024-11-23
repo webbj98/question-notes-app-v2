@@ -91,8 +91,6 @@ const questionTypeLabelMap = new Map<QuestionType, string>([
     ['front-end', 'Front-End']
 ])
 
-
-
 export function getQuestionTypeLabel(value: QuestionType) {
     return questionTypeLabelMap.get(value);
 }
