@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import './QuestionsPage.css';
-import { getDsaPerformanceLabel, getDsaPerformanceRating, getQuestionTypeLabel } from "../../../shared/typings/mappings";
+import { getDsaPerformanceRating, getQuestionTypeLabel } from "../../../shared/typings/mappings";
 import Alert from "../../components/Alert";
-import { AlertTypes, DsaPerformance, QuestionType, QuestionWithAttempts, QuestionWithLastAttempt } from "../../../shared/typings/model";
+import { AlertTypes, DsaPerformance, QuestionType, QuestionTypes, QuestionWithLastAttempt } from "../../../shared/typings/model";
 import { useFetchQuestionsWithLastAttempt } from "../../http";
 import { addNumDays } from "../../util";
 import { NUM_DAYS_TIL_LATE} from "../../config"
@@ -29,7 +29,7 @@ const QuestionsPage: React.FC = () => {
     const [sortColumn, setSortColumn] = useState('title');
     const [sortDir, setSortDir] = useState(SORT_DIR.ASC);
     const [searchText, setSearchText] = useState('');
-    const [questionTypeFilters, setQuestionTypeFilters] = useState<QuestionType[]>([...QUESTION_TYPE_LIST])
+    const [questionTypeFilters, setQuestionTypeFilters] = useState<QuestionType[]>([...QuestionTypes])
 
     const searchedQuestionsWithLastAttempt = questionsWithLastAttempt.filter((questionLastAttempt) => questionLastAttempt.question.title.includes(searchText))
  
@@ -70,8 +70,8 @@ const QuestionsPage: React.FC = () => {
                 }
 
                 // TODO: Compute retake date somwhere else and so don't compute it each comparison
-                const aRetakeDate = computeRetakeDate(a.lastAttempt.date, a.lastAttempt.suggestedWaitDuration);
-                const bRetakeDate = computeRetakeDate(b.lastAttempt.date, b.lastAttempt.suggestedWaitDuration);
+                const aRetakeDate = addNumDays(a.lastAttempt.date, a.lastAttempt.suggestedWaitDuration);
+                const bRetakeDate = addNumDays(b.lastAttempt.date, b.lastAttempt.suggestedWaitDuration);
 
                 if (aRetakeDate > bRetakeDate) {
                     return 1 * sorDirSign

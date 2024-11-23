@@ -31,7 +31,8 @@ export type FrontEndPerformance =  typeof FrontEndPerformances[number];
 // Will be a combination of all perforamnce types
 export type Performance = DsaPerformance | FrontEndPerformance;
 
-export type QuestionType = 'dsa' |  'front-end';
+export const QuestionTypes = ['dsa', 'front-end'] as const;
+export type QuestionType = typeof QuestionTypes[number];
 
 export enum AlertTypes {
     Success = 'success',

@@ -64,7 +64,7 @@ const CreateAttempt: React.FC<{question: Question, onCreateAttempt: () => void}>
                 </div>
 
                 <div className="section">
-                    <label htmlFor="timeTaken">Time Taken</label>
+                    <label htmlFor="timeTaken">Time Taken (minutes) </label>
                     <input id="timeTaken" type='number' value={timeTaken} min={0} required onChange={(event) => setTimeTaken(Number(event.target.value))} />
                 </div>
 
@@ -76,7 +76,7 @@ const CreateAttempt: React.FC<{question: Question, onCreateAttempt: () => void}>
                 </div>
 
                 <div className="section">
-                    <label htmlFor="suggestedWaitDuration">Suggested Wait Duration</label>
+                    <label htmlFor="suggestedWaitDuration">Suggested Wait Duration (days)</label>
                     <input id="suggestedWaitDuration" type='number' value={suggestedWaitDuration} onChange={(event) => setSuggestedWaitDuration(Number(event.target.value))} />
                 </div>
 

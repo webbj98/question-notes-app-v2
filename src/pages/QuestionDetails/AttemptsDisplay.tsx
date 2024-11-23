@@ -6,9 +6,9 @@ const AttemptCard: React.FC<{attempt: AttemptWithoutQuestion, onDelete: (id: num
         <div className='attempt-card'>
             {/* <p>Date: {attempt.date.toDateString()}</p> */}
             <p>Date: {attempt.date.toLocaleDateString()}</p>
-            <p>Time Taken: {attempt.timeTaken}</p>
+            <p>Time Taken: {attempt.timeTaken} minutes</p>
             <p>Performance: {attempt.performance}</p>
-            <p>Suggested Wait Duration: {attempt.suggestedWaitDuration}</p>
+            <p>Suggested Wait Duration: {attempt.suggestedWaitDuration} {(attempt.suggestedWaitDuration) ? 'days' : ''}</p>
 
             <button onClick={() => onDelete(attempt.id)}>Delete</button>
         </div>
