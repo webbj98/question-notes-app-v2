@@ -29,7 +29,7 @@ const QuestionsPage: React.FC = () => {
     const [sortColumn, setSortColumn] = useState('title');
     const [sortDir, setSortDir] = useState(SORT_DIR.ASC);
     const [searchText, setSearchText] = useState('');
-    const [questionTypeFilters, setQuestionTypeFilters] = useState<QuestionType[]>([...QuestionTypes])
+    const [questionTypeFilters, setQuestionTypeFilters] = useState(new Set([...QuestionTypes]))
 
     const searchedQuestionsWithLastAttempt = questionsWithLastAttempt.filter((questionLastAttempt) => questionLastAttempt.question.title.includes(searchText))
  
@@ -171,6 +171,24 @@ const QuestionsPage: React.FC = () => {
         )
     })
 
+    const handleToggleFilter = (filterName) => {
+        setQuestionTypeFilters((prevQuestionTypeFilters) => {
+
+            const newFilters = prevQuestionTypeFilters
+        })
+
+
+    }
+
+
+    const questionTypeFilterOptions = QuestionTypes.map((questionType) => {
+        return (
+            <option>
+
+            </option>
+        )
+    })
+
     if (isLoading) {
         return <h1>Loading...</h1>
     }
@@ -192,6 +210,10 @@ const QuestionsPage: React.FC = () => {
                 <button className='sort-dir-button' onClick={handleChangeSortDirection}>
                     {sortDir}
                 </button>
+
+                {/* <select value={}>
+                    
+                </select> */}
 
             </div>
             
